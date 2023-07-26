@@ -26,5 +26,4 @@
   "require": {
         "php": ">=5.4.0"
   },
-  "prefer-stable": true
 }
