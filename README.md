@@ -25,7 +25,7 @@ composer require kelvinzer0/curl-impersonate-php
 Below is an example of using Curl-Impersonate-PHP to make an HTTP request while emulating the behavior of a browser:
 
 ```php
-$curl = new CurlImpersonate();
+$curl = new CurlImpersonate\CurlImpersonate();
 $curl->setopt(CURLCMDOPT_URL, 'https://example.com/');
 $curl->setopt(CURLCMDOPT_METHOD, 'GET');
 $curl->setopt(CURLCMDOPT_HEADER, false);
