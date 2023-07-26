@@ -1,4 +1,5 @@
 <?php
+namespace CurlImpersonate;
 class CurlImpersonate {
     private $url;
     private $method = 'GET';
