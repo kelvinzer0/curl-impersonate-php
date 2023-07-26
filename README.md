@@ -49,7 +49,7 @@ The `setopt` function is used to set options in the HTTP request that will be ex
 | `CURLCMDOPT_POSTFIELDS`        | Sets the data to be sent as the request body (can be in the form of an array or object, will be converted to JSON). |
 | `CURLCMDOPT_HTTP_HEADERS`      | Sets the HTTP headers in the form of an array for the request.                                          |
 | `CURLCMDOPT_HEADER`            | Sets whether the response will include headers or not (boolean).                                        |
-| `CURLCMDOPT_ENGINE`            | Sets the cURL engine to be used for request execution (e.g., "curl", "wget", etc.).                    |
+| `CURLCMDOPT_ENGINE`            | Sets the cURL engine to be used for request execution (e.g., "curl", etc.).                    |
 
 ## Streaming Usage
 
