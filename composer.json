@@ -26,11 +26,5 @@
   "require": {
         "php": ">=5.4.0"
   },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "2.x-dev"
-    }
-  },
-  "minimum-stability": "stable",
   "prefer-stable": true
 }
