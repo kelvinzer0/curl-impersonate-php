@@ -25,7 +25,7 @@ composer require kelvinzer0/curl-impersonate-php
 Below is an example of using Curl-Impersonate-PHP to make an HTTP request while emulating the behavior of a browser:
 
 ```php
-$curl = new Curl-Impersonate();
+$curl = new CurlImpersonate();
 $curl->setopt(CURLCMDOPT_URL, 'https://example.com/');
 $curl->setopt(CURLCMDOPT_METHOD, 'GET');
 $curl->setopt(CURLCMDOPT_HEADER, false);
@@ -57,7 +57,7 @@ In addition to supporting getting the standard output of HTTP request execution,
 1. **Enable Streaming**: Call the `execStream` function to enable streaming before starting the HTTP request:
 
 ```php
-$curl = new Curl-Impersonate();
+$curl = new CurlImpersonate();
 $curl->setopt(CURLCMDOPT_URL, 'https://example.com/');
 $curl->setopt(CURLCMDOPT_METHOD, 'GET');
 $curl->setopt(CURLCMDOPT_ENGINE, "/Users/qindexmedia/Downloads/curl-impersonate-v0.5.4.x86_64-macos/curl_safari15_3");
@@ -85,7 +85,7 @@ $curl->closeStream();
 Here's a complete example of using streaming in Curl-Impersonate-PHP:
 
 ```php
-$curl = new Curl-Impersonate();
+$curl = new CurlImpersonate();
 $curl->setopt(CURLCMDOPT_URL, 'https://example.com/');
 $curl->setopt(CURLCMDOPT_METHOD, 'GET');
 $curl->setopt(CURLCMDOPT_ENGINE, "/Users/qindexmedia/Downloads/curl-impersonate-v0.5.4.x86_64-macos/curl_safari15_3");
