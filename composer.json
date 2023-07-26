@@ -23,8 +23,8 @@
       "url": "https://github.com/lwthiker/curl-impersonate"
     }
   ],
-  "require-dev": {
-    "phpunit/phpunit": "^9.5"
+  "require": {
+        "php": ">=5.4.0"
   },
   "extra": {
     "branch-alias": {
