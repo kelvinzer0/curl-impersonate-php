@@ -30,7 +30,7 @@ class CurlImpersonate {
                 $this->engineCurl = $value;
                 break;
             default:
-                throw new InvalidArgumentException("Invalid option: {$option}");
+                throw new \InvalidArgumentException("Invalid option: {$option}");
         }
     }
 
@@ -43,21 +43,22 @@ class CurlImpersonate {
     public function exec() {
         $this->prepareData();
 
-        $curlCommand = "{$this->engineCurl} -X {$this->method}";
+        $curlCommand = $this->engineCurl;
+        $curlCommand .= ' -X ' . escapeshellarg($this->method);
 
         if ($this->data !== null) {
-            $curlCommand .= " -d '{$this->data}'";
+            $curlCommand .= ' -d ' . escapeshellarg($this->data);
         }
 
         foreach ($this->headers as $header) {
-            $curlCommand .= " -H '{$header}'";
+            $curlCommand .= ' -H ' . escapeshellarg($header);
         }
 
         if ($this->includeHeaders) {
-            $curlCommand .= " -i";
+            $curlCommand .= ' -i';
         }
 
-        $curlCommand .= " {$this->url}";
+        $curlCommand .= ' ' . escapeshellarg($this->url);
 
         return $curlCommand;
     }
@@ -117,4 +118,3 @@ define('CURLCMDOPT_POSTFIELDS', 3);
 define('CURLCMDOPT_HTTP_HEADERS', 4);
 define('CURLCMDOPT_HEADER', 5);
 define('CURLCMDOPT_ENGINE', 6);
-?>
