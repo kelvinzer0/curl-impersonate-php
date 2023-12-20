@@ -4,6 +4,8 @@ class CurlImpersonate {
     private $url;
     private $method = 'GET';
     private $headers = array();
+    private $cookieFile;
+    private $cookieJar;
     private $data;
     private $includeHeaders = false; 
     private $engineCurl = "curl"; 
@@ -29,6 +31,12 @@ class CurlImpersonate {
             case CURLCMDOPT_ENGINE:
                 $this->engineCurl = $value;
                 break;
+            case CURLCMDOPT_COOKIEFILE:
+                $this->cookieFile = $value;
+                break;
+            case CURLCMDOPT_COOKIEJAR:
+                $this->cookieJar = $value;
+                break;
             default:
                 throw new \InvalidArgumentException("Invalid option: {$option}");
         }
@@ -45,6 +53,14 @@ class CurlImpersonate {
 
         $curlCommand = $this->engineCurl;
         $curlCommand .= ' -X ' . escapeshellarg($this->method);
+
+        if ($this->cookieFile !== null) {
+            $curlCommand .= ' --cookie ' . escapeshellarg($this->cookieFile);
+        }
+
+        if ($this->cookieJar !== null) {
+            $curlCommand .= ' --cookie-jar ' . escapeshellarg($this->cookieJar);
+        }
 
         if ($this->data !== null) {
             $curlCommand .= ' -d ' . escapeshellarg($this->data);
@@ -118,3 +134,5 @@ define('CURLCMDOPT_POSTFIELDS', 3);
 define('CURLCMDOPT_HTTP_HEADERS', 4);
 define('CURLCMDOPT_HEADER', 5);
 define('CURLCMDOPT_ENGINE', 6);
+define('CURLCMDOPT_COOKIEFILE', 7);
+define('CURLCMDOPT_COOKIEJAR', 8);
