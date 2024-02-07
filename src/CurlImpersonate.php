@@ -93,7 +93,10 @@ class CurlImpersonate {
             fclose($pipes[0]);
             $output = stream_get_contents($pipes[1]);
             fclose($pipes[1]);
-            $error = stream_get_contents($pipes[2]);
+            $error = stream_get_contents($pipes[2]);            
+            if(!empty($error) && empty($output)) {
+                throw new \Exception("ERROR: " . $error);
+            }            
             fclose($pipes[2]);
             proc_close($process);
         }
