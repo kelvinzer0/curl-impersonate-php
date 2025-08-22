@@ -36,7 +36,8 @@ echo $response;
 $curl->closeStream();
 ```
 
-Be sure to replace the value of the `CURLCMDOPT_URL` option with the appropriate target URL and set the browser impersonation according to your needs.
+Be sure to replace the value of the `CURLCMDOPT_URL` option with the appropriate target URL and set the browser impersonation according to your needs. The files executable needed for browser impersonation can downloaded from the following link: [https://github.com/lwthiker/curl-impersonate/releases]
+Be sure you will set the executable permissions(chown +x) for all files
 
 ## `setopt` Function
 
