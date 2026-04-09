@@ -1,114 +1,290 @@
-# Curl-Impersonate-PHP
+<div align="center">
 
-Curl-Impersonate-PHP is a library that allows the execution of HTTP requests using cURL within the PHP environment with the ability to emulate the behavior of four major browsers (Chrome, Firefox, Safari, and Microsoft Edge).
+# curl-impersonate-php
 
-## Description
+**Stop getting blocked. Start impersonating real browsers.**
 
-Curl-Impersonate-PHP is an implementation of the original project Curl-Impersonate, available at [https://github.com/lwthiker/curl-impersonate](https://github.com/lwthiker/curl-impersonate), which introduces a specialized cURL build that can mimic the behavior of four major browsers. By using Curl-Impersonate-PHP, you can make HTTP requests from PHP using cURL but with headers and behavior that resemble Chrome, Firefox, Safari, or Microsoft Edge.
+[![Latest Version](https://img.shields.io/github/v/release/kelvinzer0/curl-impersonate-php?style=flat-square&color=blue)](https://github.com/kelvinzer0/curl-impersonate-php/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/kelvinzer0/curl-impersonate-php/ci.yml?style=flat-square&label=build)](https://github.com/kelvinzer0/curl-impersonate-php/actions)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D7.4-8892BF?style=flat-square&logo=php&logoColor=white)](https://php.net)
+[![License](https://img.shields.io/github/license/kelvinzer0/curl-impersonate-php?style=flat-square)](LICENSE)
+[![Downloads](https://img.shields.io/packagist/dt/kelvinzer0/curl-impersonate-php?style=flat-square&color=green)](https://packagist.org/packages/kelvinzer0/curl-impersonate-php)
+[![Stars](https://img.shields.io/github/stars/kelvinzer0/curl-impersonate-php?style=social)](https://github.com/kelvinzer0/curl-impersonate-php)
 
-## Key Features
+PHP wrapper for [curl-impersonate](https://github.com/lwthiker/curl-impersonate) — execute HTTP requests that **mimic real browser TLS fingerprints**, bypassing Cloudflare, Akamai, Datadome, and other anti-bot systems.
 
-- Support for making HTTP requests through cURL with headers and behavior emulating Chrome, Firefox, Safari, and Microsoft Edge.
-- Full control over cURL options such as the target URL, HTTP method, request data, headers, and more through the `setopt` function.
-- Ability to access the execution results of the request in the form of a cURL command, standard output, or streaming.
+[Installation](#installation) · [Quick Start](#quick-start) · [Browser Presets](#browser-presets) · [API](#api) · [FAQ](#faq)
+
+</div>
+
+---
+
+## Why This Exists
+
+Regular `curl` has a distinct TLS fingerprint. Anti-bot systems detect it instantly.
+
+**curl-impersonate** uses a patched libcurl that produces the **exact same TLS ClientHello** as Chrome, Firefox, or Safari. Your requests become indistinguishable from a real browser.
+
+This library wraps it in a clean PHP API — no shell scripting required.
+
+```
+Regular curl    →  TLS fingerprint = "bot"     →  🚫 403 Blocked
+curl-impersonate →  TLS fingerprint = "Chrome"  →  ✅ 200 OK
+```
 
 ## Installation
-
-You can install Curl-Impersonate-PHP using Composer. Run the following command in your project directory:
 
 ```bash
 composer require kelvinzer0/curl-impersonate-php
 ```
 
-## Usage
+### Install curl-impersonate binary
 
-Below is an example of using Curl-Impersonate-PHP to make an HTTP request while emulating the behavior of a browser:
+```bash
+# Linux x86_64 (v0.6.1)
+curl -L https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.1/curl-impersonate-v0.6.1.x86_64-linux-gnu.tar.gz | tar xz
+export LD_LIBRARY_PATH="$PWD:$LD_LIBRARY_PATH"
+
+# macOS (Homebrew)
+brew install curl-impersonate
+```
+
+See [curl-impersonate releases](https://github.com/lwthiker/curl-impersonate/releases) for all builds.
+
+## Quick Start
 
 ```php
+<?php
 require 'vendor/autoload.php';
-$curl = new CurlImpersonate\CurlImpersonate();
-$curl->setopt(CURLCMDOPT_URL, 'https://example.com/');
-$curl->setopt(CURLCMDOPT_METHOD, 'GET');
-$curl->setopt(CURLCMDOPT_HEADER, false);
-$curl->setopt(CURLCMDOPT_ENGINE, "/Users/qindexmedia/Downloads/curl-impersonate-v0.5.4.x86_64-macos/curl_safari15_3");
-$response = $curl->execStandard();
+
+use CurlImpersonate\CurlImpersonate;
+
+$curl = new CurlImpersonate();
+
+// Option 1: Use a browser preset (auto-detects binary path)
+$response = $curl
+    ->setBrowser(CurlImpersonate::BROWSER_CHROME)
+    ->setopt(CurlImpersonate::OPT_URL, 'https://example.com')
+    ->setopt(CurlImpersonate::OPT_METHOD, 'GET')
+    ->exec();
+
 echo $response;
-$curl->closeStream();
 ```
 
-Be sure to replace the value of the `CURLCMDOPT_URL` option with the appropriate target URL and set the browser impersonation according to your needs.
-
-## `setopt` Function
-
-The `setopt` function is used to set options in the HTTP request that will be executed using cURL. Here is a list of options supported by the `setopt` function:
-
-| Option                         | Description                                                                                             |
-|--------------------------------|---------------------------------------------------------------------------------------------------------|
-| `CURLCMDOPT_URL`               | Sets the target URL for the HTTP request.                                                               |
-| `CURLCMDOPT_METHOD`            | Sets the HTTP method to be used (e.g., GET, POST, PUT, etc.).                                            |
-| `CURLCMDOPT_POSTFIELDS`        | Sets the data to be sent as the request body (can be in the form of an array or object, will be converted to JSON). |
-| `CURLCMDOPT_HTTP_HEADERS`      | Sets the HTTP headers in the form of an array for the request.                                          |
-| `CURLCMDOPT_HEADER`            | Sets whether the response will include headers or not (boolean).                                        |
-| `CURLCMDOPT_COOKIEFILE`        | Sets the path to the file containing cookies for the request.                                            |
-| `CURLCMDOPT_COOKIEJAR`         | Sets the path to the file to store cookies received from the response.                                   |
-| `CURLCMDOPT_ENGINE`            | Sets the cURL engine to be used for request execution (e.g., "curl", etc.).                    |
-
-## Streaming Usage
-
-In addition to supporting getting the standard output of HTTP request execution, Curl-Impersonate-PHP also provides the ability to stream (retrieve data in chunks) the response from an ongoing HTTP request. You can use the streaming feature with the following steps:
-
-1. **Enable Streaming**: Call the `execStream` function to enable streaming before starting the HTTP request:
-
 ```php
-$curl = new CurlImpersonate\CurlImpersonate();
-$curl->setopt(CURLCMDOPT_URL, 'https://example.com/');
-$curl->setopt(CURLCMDOPT_METHOD, 'GET');
-$curl->setopt(CURLCMDOPT_ENGINE, "/Users/qindexmedia/Downloads/curl-impersonate-v0.5.4.x86_64-macos/curl_safari15_3");
-$curl->execStream();
+<?php
+// Option 2: Point to a specific binary
+$curl = new CurlImpersonate();
+$response = $curl
+    ->setopt(CurlImpersonate::OPT_URL, 'https://example.com')
+    ->setopt(CurlImpersonate::OPT_ENGINE, '/path/to/curl_chrome116')
+    ->exec();
 ```
 
-2. **Retrieve Data in Chunks**: You can use the `readStream` function to retrieve response data in chunks of the specified size:
+## Browser Presets
+
+| Preset | Constant | Mimics |
+|---|---|---|
+| Chrome 116 | `BROWSER_CHROME` | Chrome 116 on Windows 10 |
+| Chrome 120 | `BROWSER_CHROME_120` | Chrome 120 on Windows 10 |
+| Firefox 102 | `BROWSER_FIREFOX` | Firefox 102 ESR on Linux |
+| Firefox 117 | `BROWSER_FIREFOX_117` | Firefox 117 on Linux |
+| Safari 15.3 | `BROWSER_SAFARI` | Safari 15.3 on macOS Monterey |
+| Safari 17.0 | `BROWSER_SAFARI_17` | Safari 17.0 on macOS Sonoma |
+| Edge 99 | `BROWSER_EDGE` | Edge 99 on Windows |
 
 ```php
-$chunkSize = 4096; // Size of the data chunks to be retrieved (in bytes)
-while ($data = $curl->readStream($chunkSize)) {
-    echo $data;
-    // Process the response data here
+$curl->setBrowser(CurlImpersonate::BROWSER_CHROME_120);
+```
+
+## API
+
+### Options
+
+```php
+$curl->setopt(int $option, mixed $value): self
+```
+
+| Constant | Description | Example |
+|---|---|---|
+| `OPT_URL` | Target URL | `'https://api.example.com/data'` |
+| `OPT_METHOD` | HTTP method | `'POST'` |
+| `OPT_POSTFIELDS` | Request body (array → JSON) | `['key' => 'value']` |
+| `OPT_HTTP_HEADERS` | Headers array | `['Authorization: Bearer xxx']` |
+| `OPT_HEADER` | Include response headers | `true` |
+| `OPT_ENGINE` | Path to curl-impersonate binary | `'/usr/local/bin/curl_chrome116'` |
+| `OPT_PROXY` | Proxy (HTTP or SOCKS5) | `'socks5://127.0.0.1:1080'` |
+| `OPT_TIMEOUT` | Request timeout (seconds) | `30` |
+| `OPT_FOLLOW_LOCATION` | Follow redirects | `true` |
+| `OPT_VERIFY_SSL` | Verify SSL certificates | `true` |
+| `OPT_COOKIEFILE` | Read cookies from file | `'/tmp/cookies.txt'` |
+| `OPT_COOKIEJAR` | Save cookies to file | `'/tmp/cookies.txt'` |
+
+### Methods
+
+```php
+// Execute and get response
+$response = $curl->exec(): ?string
+
+// Execute with streaming
+$curl->execStream(): self
+$chunk = $curl->readStream(4096): string|false
+$curl->closeStream(): void
+
+// Build command (for debugging)
+$command = $curl->buildCommand(): string
+
+// Reset for reuse
+$curl->reset(): self
+```
+
+## Examples
+
+### POST JSON with authentication
+
+```php
+$curl = new CurlImpersonate();
+$response = $curl
+    ->setBrowser(CurlImpersonate::BROWSER_CHROME)
+    ->setopt(CurlImpersonate::OPT_URL, 'https://api.example.com/users')
+    ->setopt(CurlImpersonate::OPT_METHOD, 'POST')
+    ->setopt(CurlImpersonate::OPT_POSTFIELDS, ['name' => 'Kelvin', 'role' => 'admin'])
+    ->setopt(CurlImpersonate::OPT_HTTP_HEADERS, [
+        'Authorization: Bearer YOUR_TOKEN',
+        'Content-Type: application/json',
+    ])
+    ->exec();
+```
+
+### SOCKS5 proxy
+
+```php
+$curl = new CurlImpersonate();
+$response = $curl
+    ->setBrowser(CurlImpersonate::BROWSER_FIREFOX)
+    ->setopt(CurlImpersonate::OPT_URL, 'https://check.torproject.org/api/ip')
+    ->setopt(CurlImpersonate::OPT_PROXY, 'socks5h://127.0.0.1:9050')
+    ->exec();
+```
+
+### Stream large responses
+
+```php
+$curl = new CurlImpersonate();
+$curl
+    ->setBrowser(CurlImpersonate::BROWSER_SAFARI)
+    ->setopt(CurlImpersonate::OPT_URL, 'https://example.com/large-file')
+    ->execStream();
+
+while ($chunk = $curl->readStream(8192)) {
+    echo $chunk; // process chunk by chunk
 }
 ```
 
-3. **Close Streaming**: After you finish using streaming, be sure to close it by calling the `closeStream` function:
+### Scrape with cookies
 
 ```php
-$curl->closeStream();
+$curl = new CurlImpersonate();
+
+// Step 1: Login and save cookies
+$curl
+    ->setBrowser(CurlImpersonate::BROWSER_CHROME)
+    ->setopt(CurlImpersonate::OPT_URL, 'https://example.com/login')
+    ->setopt(CurlImpersonate::OPT_METHOD, 'POST')
+    ->setopt(CurlImpersonate::OPT_POSTFIELDS, ['user' => 'admin', 'pass' => 'secret'])
+    ->setopt(CurlImpersonate::OPT_COOKIEJAR, '/tmp/cookies.txt')
+    ->exec();
+
+// Step 2: Use saved cookies
+$response = $curl
+    ->reset()
+    ->setBrowser(CurlImpersonate::BROWSER_CHROME)
+    ->setopt(CurlImpersonate::OPT_URL, 'https://example.com/dashboard')
+    ->setopt(CurlImpersonate::OPT_COOKIEFILE, '/tmp/cookies.txt')
+    ->exec();
 ```
 
-## Example of Streaming Usage
+## FAQ
 
-Here's a complete example of using streaming in Curl-Impersonate-PHP:
+### Where do I get the curl-impersonate binary?
+
+Download from [releases](https://github.com/lwthiker/curl-impersonate/releases) or install via package manager:
+
+```bash
+# macOS
+brew install curl-impersonate
+
+# Arch Linux
+yay -S curl-impersonate
+
+# Docker
+docker pull lwthiker/curl-impersonate:0.6.1
+```
+
+### How do I use proxies?
+
+Use `OPT_PROXY` with any proxy type curl supports:
 
 ```php
-$curl = new CurlImpersonate\CurlImpersonate();
-$curl->setopt(CURLCMDOPT_URL, 'https://example.com/');
-$curl->setopt(CURLCMDOPT_METHOD, 'GET');
-$curl->setopt(CURLCMDOPT_ENGINE, "/Users/qindexmedia/Downloads/curl-impersonate-v0.5.4.x86_64-macos/curl_safari15_3");
-$curl->execStream();
+// HTTP proxy
+->setopt(CurlImpersonate::OPT_PROXY, 'http://user:pass@proxy.example.com:8080')
 
-$chunkSize = 4096; // Size of the data chunks to be retrieved (in bytes)
-while ($data = $curl->readStream($chunkSize)) {
-    echo $data;
-    // Process the response data here
-}
+// SOCKS5 proxy
+->setopt(CurlImpersonate::OPT_PROXY, 'socks5://127.0.0.1:1080')
 
-$curl->closeStream();
+// SOCKS5 with DNS resolution through proxy
+->setopt(CurlImpersonate::OPT_PROXY, 'socks5h://127.0.0.1:1080')
 ```
 
-Be sure to replace the value of `CURLCMDOPT_URL` with the appropriate target URL and set the browser impersonation according to your needs. Streaming is particularly useful for handling large responses or responses that need to be processed in specific chunks sequentially.
+### I get "command not found" errors
 
-## Contributions
+Make sure `curl-impersonate` binaries are in your PATH or use the full path:
 
-If you would like to contribute to Curl-Impersonate-PHP, we greatly appreciate your contributions. Please open a new issue or submit a pull request on our GitHub repository.
+```php
+// Option 1: setBrowser with explicit path
+->setBrowser(CurlImpersonate::BROWSER_CHROME, '/opt/curl-impersonate/bin')
+
+// Option 2: direct engine path
+->setopt(CurlImpersonate::OPT_ENGINE, '/opt/curl-impersonate/bin/curl_chrome116')
+```
+
+### Does this work on shared hosting?
+
+No. This library requires shell access to execute the `curl-impersonate` binary. It works on VPS, dedicated servers, Docker containers, and any environment where you can install system packages.
+
+## Comparison
+
+| Feature | Native curl | Guzzle | This library |
+|---|---|---|---|
+| TLS fingerprint | ❌ Bot detection | ❌ Bot detection | ✅ Real browser |
+| HTTP/2 fingerprint | ❌ | ❌ | ✅ Real browser |
+| Ja3 fingerprint | ❌ | ❌ | ✅ Matched |
+| PHP API | ❌ Raw resource | ✅ Clean | ✅ Clean |
+| Proxy support | ✅ | ✅ | ✅ |
+| Streaming | ✅ | ✅ | ✅ |
+
+## Who Uses This
+
+- Web scraping at scale without IP rotation
+- SEO monitoring tools
+- Price comparison services
+- API integration with anti-bot protected endpoints
+- Security research and testing
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-Curl-Impersonate-PHP is licensed under the [MIT License](LICENSE), which means you are free to use, modify, and distribute this library according to the terms of the license.
+[MIT](LICENSE) © Kelvin Yuli Andrian
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if it saved you from 403s**
+
+[Report Bug](https://github.com/kelvinzer0/curl-impersonate-php/issues) · [Request Feature](https://github.com/kelvinzer0/curl-impersonate-php/issues/new)
+
+</div>
